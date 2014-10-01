@@ -1,0 +1,3 @@
+[submodule "yamlcpp"]
+	path = yamlcpp
+	url = https://github.com/gradecam/yaml-cpp.git
