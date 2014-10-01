@@ -13,4 +13,6 @@ file (GLOB SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
 add_library(yaml ${SOURCES})
 
 append_firebreath_link_library(yaml-cpp)
+append_firebreath_link_library(yaml)
 append_firebreath_include_dir(${YAML_DIR}/include)
+append_firebreath_include_dir(${CMAKE_CURRENT_SOURCE_DIR})
