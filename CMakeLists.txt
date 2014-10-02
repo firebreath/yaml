@@ -1,6 +1,10 @@
 
 set (YAML_DIR ${CMAKE_CURRENT_SOURCE_DIR}/yamlcpp)
 
+if (NOT BOOST_ROOT)
+    set(BOOST_ROOT ${FB_BOOST_SOURCE_DIR})
+endif()
+
 add_subdirectory(${YAML_DIR})
 
 include_directories(
@@ -29,3 +33,4 @@ append_firebreath_link_library(yaml-cpp)
 append_firebreath_link_library(yaml)
 append_firebreath_include_dir(${YAML_DIR}/include)
 append_firebreath_include_dir(${CMAKE_CURRENT_SOURCE_DIR})
+
