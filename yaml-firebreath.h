@@ -12,6 +12,8 @@
  Copyright 2014 GradeCam, Inc
  \**********************************************************/
 
+#include <APITypes.h>
+
 namespace YAML {
     class Emitter;
     class Node;

@@ -14,18 +14,18 @@
 
 #include "yaml-firebreath.h"
 
+#include <fstream>
 #include "APITypes.h"
 #include "variant.h"
-
 
 #include "yaml-cpp/yaml.h"
 
 namespace FB {
     
     void emitVariantAsYamlFile(const variant& val, const std::string& filename) {
-        ofstream myfile;
+        std::ofstream myfile;
         myfile.open(filename.c_str());
-        if (outfile.fail()) {
+        if (myfile.fail()) {
             throw new std::runtime_error("Could not open config file");
         }
         YAML::Emitter emitter(myfile);
@@ -33,7 +33,7 @@ namespace FB {
         myfile.close();
     }
     
-    void emitVariantAsYaml(YAML::Emitter& out, const variant &val);
+    void emitVariantAsYaml(YAML::Emitter& out, const variant &val)
     {
         if (val.is_of_type<std::string>()) {
             out << val.convert_cast<std::string>();
@@ -44,14 +44,15 @@ namespace FB {
                 out << YAML::Key << it->first;
                 out << YAML::Value;
                 emitVariantAsYaml(out, it->second);
-                out << YAML::EndMap;
             }
+            out << YAML::EndMap;
         } else if (val.is_of_type<VariantList>()) {
             out << YAML::BeginSeq;
             VariantList list = val.cast<VariantList>();
             for (VariantList::iterator it = list.begin(); it != list.end(); ++it) {
-                emitVariantValue(out, *it);
+                emitVariantAsYaml(out, *it);
             }
+            out << YAML::EndSeq;
         } else if (val.is_of_type<int>()
                    || val.is_of_type<char>()
                    || val.is_of_type<short>()
@@ -77,34 +78,28 @@ namespace FB {
     }
     variant yamlNodeToVariant(const YAML::Node& node) {
         // recursive depth first
-        YAML::CONTENT_TYPE type = node.GetType();
         std::string outStr;
-        switch (type)
-        {
-            case YAML::CT_SCALAR:
-                node >> outStr;
-                return outStr;
-            case YAML::CT_SEQUENCE:
-                VariantList list;
-                for (unsigned int i = 0; i < node.size(); i++) {
-                    const YAML::Node & subnode = node[i];
-                    list.push_back(yamlNodeToVariant(subnode));
-                }
-                return list;
-            case YAML::CT_MAP:
-                VariantMap map;
-                for (YAML::Iterator i = node.begin(); i != node.end(); ++i) {
-                    const YAML::Node & key   = i.first();
-                    const YAML::Node & value = i.second();
-                    key >> outStr;
-                    map[key] = yamlNodeToVariant(value);
-                }
-                return map;
-            case YAML::CT_NONE:
-                return FBNull;
-                break;
-            default:
-                return FBVoid;
+        if (node.IsScalar()) {
+            return node.as<std::string>();
+        } else if (node.IsSequence()) {
+            VariantList list;
+            for (unsigned int i = 0; i < node.size(); i++) {
+                const YAML::Node & subnode = node[i];
+                list.push_back(yamlNodeToVariant(subnode));
+            }
+            return list;
+        } else if (node.IsMap()) {
+            VariantMap map;
+            for (YAML::const_iterator i = node.begin(); i != node.end(); ++i) {
+                const YAML::Node & key   = i->first;
+                const YAML::Node & value = i->second;
+                map[key.as<std::string>()] = yamlNodeToVariant(value);
+            }
+            return map;
+        } else if (node.IsNull()) {
+            return FBNull();
+        } else {
+            return FBVoid();
         }
     }
     

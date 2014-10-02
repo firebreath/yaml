@@ -3,12 +3,25 @@ set (YAML_DIR ${CMAKE_CURRENT_SOURCE_DIR}/yamlcpp)
 
 add_subdirectory(${YAML_DIR})
 
-include_directories(${YAML_DIR} ${FB_SCRIPTINGCORE_SOURCE_DIR})
+include_directories(
+    ${YAML_DIR}/include
+    ${FB_SCRIPTINGCORE_SOURCE_DIR}
+    ${FB_CONFIG_DIR})
 
 file (GLOB SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
-    [^.]*.cpp
-    [^.]*.h
+    yaml*.cpp
+    yaml*.h
     )
+
+if (YAML_SUPPORT_CONFIG)
+    add_firebreath_library(ConfigManager)
+    file (GLOB CFGSOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+        Config*.cpp
+        Config*.h
+        )
+    include_directories(${FBLIB_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+    set(SOURCES ${SOURCES} ${CFGSOURCES})
+endif()
 
 add_library(yaml ${SOURCES})
 
