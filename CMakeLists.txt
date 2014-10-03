@@ -4,6 +4,7 @@ set (YAML_DIR ${CMAKE_CURRENT_SOURCE_DIR}/yamlcpp)
 if (NOT BOOST_ROOT)
     set(BOOST_ROOT ${FB_BOOST_SOURCE_DIR})
 endif()
+set(YAML_CPP_BUILD_TOOLS OFF)
 
 add_subdirectory(${YAML_DIR})
 
